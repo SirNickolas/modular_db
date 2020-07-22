@@ -1,0 +1,11 @@
+name        "modular_db"
+description "Factorization of a relational database into a set of modules."
+authors     "Nickolay Bukreyev"
+copyright   "Copyright © 2020, Nickolay Bukreyev"
+license     "MIT"
+
+toolchainRequirements frontend=">=2.078"
+
+dependency "d2sqlite3" version="~>0.18.3"
+
+targetType "library"
