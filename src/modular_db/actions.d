@@ -22,6 +22,16 @@ ResultRange _queryModuleInfo(Database db, string sql, string moduleUrl) {
         throw new UninitializedDbException;
 }
 
+public long getModuleId(Database db, ModuleQualification q, string moduleUrl) {
+    auto moduleInfo = _queryModuleInfo(db, q.format!`
+        SELECT oid
+        FROM [-|0modules]
+        WHERE url = ?
+    `, moduleUrl);
+    enforce(!moduleInfo.empty, new ModuleNotFoundException(moduleUrl));
+    return moduleInfo.oneValue!long;
+}
+
 auto _loadModule(L)(Database db, ref L loader, Mode mode, ModuleQualification q) {
     const moduleUrl = loader.url;
     const moduleVersion = loader.version_;
@@ -100,16 +110,6 @@ public void initialize(Database db, Mode mode = Mode.load, string schema = "main
         }
 }
 
-long _queryModuleId(Database db, ModuleQualification q, string moduleUrl) {
-    auto moduleInfo = _queryModuleInfo(db, q.format!`
-        SELECT oid
-        FROM [-|0modules]
-        WHERE url = ?
-    `, moduleUrl);
-    enforce(!moduleInfo.empty, new ModuleNotFoundException(moduleUrl));
-    return moduleInfo.oneValue!long;
-}
-
 public void dropModule(Database db, string moduleUrl, string schema = "main") {
     import std.algorithm.iteration: map;
     import std.array: appender, array;
@@ -120,7 +120,7 @@ public void dropModule(Database db, string moduleUrl, string schema = "main") {
     import d2sqlite3.results: PeekMode;
 
     const q = ModuleQualification(schema, 0L);
-    const moduleId = _queryModuleId(db, q, moduleUrl);
+    const moduleId = getModuleId(db, q, moduleUrl);
 
     const nested = db.inTransaction;
     const withForeignKeys = db.execute("PRAGMA foreign_keys").oneValue!bool;

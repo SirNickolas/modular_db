@@ -73,8 +73,8 @@ struct CitiesModLoader {
     }
 
     static CitiesMod setup(moddb.Database db, ModuleQualification q) {
-        // Load the module we depend on.
-        const CountriesMod cnt = moddb.loadModule!CountriesModLoader(db);
+        // Get ID of the module we depend on.
+        const long cntId = moddb.getModuleId(db, q, CountriesModLoader.url);
         db.run(q.format!`
             CREATE TABLE [cities](
                 oid INTEGER PRIMARY KEY,
@@ -88,7 +88,7 @@ struct CitiesModLoader {
                 -- Every foreign key definition must have "ON UPDATE CASCADE" clause.
                 city_id INTEGER PRIMARY KEY REFERENCES [-.cities] ON UPDATE CASCADE
             );
-        `(cnt.qualification.id)); // Pass its ID so that we can make references to its tables.
+        `(cntId)); // Pass its ID so that we can make references to its tables.
         return CitiesMod(db, q);
     }
 
