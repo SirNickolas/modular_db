@@ -7,7 +7,7 @@ nothrow pure @safe:
 struct ModuleQualification {
 nothrow pure:
     private string _schema, _escapedSchema;
-    package long _id;
+    package long _id = -1;
 
     @property const @nogc {
         string schema() { return _schema; }
