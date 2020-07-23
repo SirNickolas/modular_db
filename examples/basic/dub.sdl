@@ -1,0 +1,6 @@
+name      "basic"
+authors   "Nickolay Bukreyev"
+copyright "Copyright © 2020, Nickolay Bukreyev"
+license   "MIT"
+
+dependency "modular_db" path="../.."
