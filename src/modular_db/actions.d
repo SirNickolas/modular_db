@@ -36,10 +36,8 @@ auto _loadModule(L)(Database db, ref L loader, Mode mode, ModuleQualification q)
     const moduleUrl = loader.url;
     const moduleVersion = loader.version_;
 
-    const nested = db.inTransaction;
-    db.execute(nested ? "SAVEPOINT _modular_db_save" : "BEGIN");
-    scope(failure) db.execute(nested ? "ROLLBACK TO _modular_db_save" : "ROLLBACK");
-    scope(success) db.execute(nested ? "RELEASE _modular_db_save" : "COMMIT");
+    auto transaction = db.startTransaction();
+    scope(success) transaction.commit();
     auto moduleInfo = _queryModuleInfo(db, q.format!`
         SELECT oid, version
         FROM [-|0modules]
@@ -102,10 +100,8 @@ public void initialize(Database db, Mode mode = Mode.load, string schema = "main
         try
             _loadModule(db, loader, mode, q);
         catch (UninitializedDbException) {
-            const nested = db.inTransaction;
-            db.execute(nested ? "SAVEPOINT _modular_db_save" : "BEGIN");
-            scope(failure) db.execute(nested ? "ROLLBACK TO _modular_db_save" : "ROLLBACK");
-            scope(success) db.execute(nested ? "RELEASE _modular_db_save" : "COMMIT");
+            auto transaction = db.startTransaction();
+            scope(success) transaction.commit();
             loader.setup(db, q);
         }
 }
@@ -133,9 +129,8 @@ public void dropModule(Database db, string moduleUrl, string schema = "main") {
     scope(exit)
         if (withForeignKeys)
             db.execute("PRAGMA foreign_keys = ON");
-    db.execute(nested ? "SAVEPOINT _modular_db_save" : "BEGIN");
-    scope(failure) db.execute(nested ? "ROLLBACK TO _modular_db_save" : "ROLLBACK");
-    scope(success) db.execute(nested ? "RELEASE _modular_db_save" : "COMMIT");
+    auto transaction = Transaction(db.raw, nested);
+    scope(success) transaction.commit();
 
     db.execute(q.format!`
         DELETE FROM [-|0modules]

@@ -85,7 +85,7 @@ Tuple!(const(char)[ ], q{schema}, const(char)[ ], q{moduleId})
 _parseQualifiers(ref _ByteString s) {
     import std.algorithm.searching: skipOver;
     import std.conv: text;
-    import std.range: empty;
+    import std.range.primitives: empty;
 
     /+
         (?:
@@ -219,7 +219,7 @@ public Tuple!(string, q{sql}, bool, q{usesSchema}, bool, q{usesModuleId})
 preprocessSql(SqlPreprocessorOptions options)(const(char)[ ] sql, size_t firstAvailableArg) {
     import std.array: appender;
     import std.conv: toChars;
-    import std.range: empty;
+    import std.range.primitives: empty;
 
     if (sql.empty)
         return typeof(return).init;
